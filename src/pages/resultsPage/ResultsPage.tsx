@@ -17,7 +17,7 @@ export const ResultsPage = (props: ResultsPageProps): ReactElement => {
         const index = location.pathname.lastIndexOf('/');
         const id = location.pathname.slice(index + 1, location.pathname.length);
         getData(`http://localhost:3100/tests/${id}`).then((result) => setTest(result));
-    });
+    }, []);
 
     return (
         <div className={styles.container}>

@@ -1,4 +1,4 @@
-import React, {Dispatch, ReactElement, SetStateAction, useContext, useEffect, useState} from 'react';
+import React, {Dispatch, ReactElement, SetStateAction, useContext, useEffect, useReducer, useState} from 'react';
 import styles from './Table.module.scss';
 import {
     createRows,
@@ -12,6 +12,38 @@ import {NoResults} from '../noResults/NoResults';
 export interface TableProps {
     setCountOfFoundedTests: Dispatch<SetStateAction<number>>
 }
+interface RowsAction {
+    type: string,
+    rows?: ReactElement[]
+}
+// //     name:
+// //     type:
+// //     status:
+// //     siteName:
+//
+
+interface Data {
+    rows: ReactElement[],
+    sortDirection: boolean
+}
+
+function rowsReducer(data: Data, action: RowsAction): Data {
+    switch (action.type) {
+        case 'sortedName': {
+            const newRows = [...data.rows];
+            const sorted = sortByAlphabet(newRows, 'name', data.sortDirection);
+            return { rows: sorted, sortDirection: !data.sortDirection };
+        }
+        case 'added': {
+            const newRows = action.rows;
+            console.log(data.rows);
+            return { rows: [...(newRows || [])], sortDirection: data.sortDirection }
+        }
+        default: {
+            throw Error('Unknown action: ' + action.type);
+        }
+    }
+}
 
 export const Table = (props: TableProps): ReactElement => {
     const testsContext = useContext(TestsContext);
@@ -19,6 +51,11 @@ export const Table = (props: TableProps): ReactElement => {
     const searchContext = useContext(SearchWordContext);
     const [sortDirection, setSortDirection] = useState(true);
     const [rowsElements, setRowsElements] = useState<ReactElement[]>([]);
+    const initialState: Data = {rows: [], sortDirection: true};
+    const [state, dispatch] = useReducer(
+        rowsReducer,
+        initialState
+    );
 
     useEffect(() => {
         Promise.all([
@@ -32,7 +69,10 @@ export const Table = (props: TableProps): ReactElement => {
                 return [sites, tests];
             })
             .then(([sites, tests]) => createRows(tests, sites))
-            .then((result) => setRowsElements(result));
+            .then((result) => {
+                setRowsElements(result);
+                dispatch({type: 'added', rows: result});
+            });
     }, []);
 
     useEffect(() => {
@@ -41,7 +81,9 @@ export const Table = (props: TableProps): ReactElement => {
                 .then((tests) => {
                     props.setCountOfFoundedTests(tests.length);
                     createRows(tests, sitesContext.sites!)
-                        .then((result) => setRowsElements(result));
+                        .then((result) => {
+                            setRowsElements(result);
+                        });
                 })
             ;
         }
@@ -49,7 +91,7 @@ export const Table = (props: TableProps): ReactElement => {
 
     return (
         <>
-            {rowsElements.length === 0
+            {state.rows.length === 0
                 ? searchContext.searchWord === '' ? (<h3>Loading...</h3>) : (<NoResults/>)
                 : (
                     <table className={styles.table}>
@@ -57,8 +99,9 @@ export const Table = (props: TableProps): ReactElement => {
                         <tr>
                             <th className={styles.tableHeader}
                                 onClick={() => {
-                                    setRowsElements(sortByAlphabet(rowsElements, 'name', sortDirection));
-                                    setSortDirection(!sortDirection);
+                                    dispatch({type: 'sortedName'});
+                                    // setRowsElements(sortByAlphabet(rowsElements, 'name', sortDirection));
+                                    // setSortDirection(!sortDirection);
                                 }}>Name
                             </th>
                             <th onClick={() => {
@@ -79,7 +122,7 @@ export const Table = (props: TableProps): ReactElement => {
                             </th>
                         </tr>
                         </thead>
-                        <tbody>{rowsElements}</tbody>
+                        <tbody>{state.rows}</tbody>
                     </table>
                 )
             }

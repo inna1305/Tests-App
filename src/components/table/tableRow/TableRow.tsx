@@ -1,4 +1,4 @@
-import {ReactElement} from 'react';
+import {memo, useEffect} from 'react';
 import React from 'react';
 import {CapitalizedStatus, CapitalizedType} from '../../../types';
 import styles from './../Table.module.scss';
@@ -17,8 +17,12 @@ export interface TableRowProps {
     borderColor: string;
 }
 
-export const TableRow = (props: TableRowProps): ReactElement => {
+export const TableRow = (props: TableRowProps) => {
     const navigate = useNavigate();
+    // useEffect(() => {
+    //     console.log(`${props.testId} was updated`);
+    // });
+
     const testId = props.testId;
 
     const buttonHandler = (status: CapitalizedStatus) => {
@@ -41,4 +45,4 @@ export const TableRow = (props: TableRowProps): ReactElement => {
             </td>
         </tr>
     );
-}
+};

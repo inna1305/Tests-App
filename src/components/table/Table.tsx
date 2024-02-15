@@ -1,65 +1,21 @@
-import React, {Dispatch, ReactElement, SetStateAction, useContext, useEffect, useReducer, useState} from 'react';
+import React, {Dispatch, ReactElement, SetStateAction, useEffect, useReducer, useState} from 'react';
 import styles from './Table.module.scss';
 import {
     createRows,
     filterContextTestsByName,
 } from './helpers/helpers';
-import {SearchWordContext, SitesContext, TestsContext} from '../../App';
 import {getData} from '../../core/helpers';
-import {sortByAlphabet, sortByStatus} from './helpers/sortHelpers';
 import {NoResults} from '../noResults/NoResults';
+import {ActionTypes, Data, rowsReducer} from './reducer';
 
 export interface TableProps {
+    searchWord: string,
     setCountOfFoundedTests: Dispatch<SetStateAction<number>>
-}
-interface RowsAction {
-    type: string,
-    rows?: ReactElement[]
-}
-
-interface Data {
-    rows: ReactElement[],
-    sortDirection: boolean
-}
-
-function rowsReducer(data: Data, action: RowsAction): Data {
-    switch (action.type) {
-        case 'sortedByName': {
-            const newRows = [...data.rows];
-            const sorted = sortByAlphabet(newRows, 'name', data.sortDirection);
-            return { rows: sorted, sortDirection: !data.sortDirection };
-        }
-        case 'sortedByType': {
-            const newRows = [...data.rows];
-            const sorted = sortByAlphabet(newRows, 'type', data.sortDirection);
-            return { rows: sorted, sortDirection: !data.sortDirection };
-        }
-        case 'sortedByStatus': {
-            const newRows = [...data.rows];
-            const sorted = sortByStatus(newRows, data.sortDirection);
-            return { rows: sorted, sortDirection: !data.sortDirection };
-        }
-        case 'sortedBySiteName': {
-            const newRows = [...data.rows];
-            const sorted = sortByAlphabet(newRows, 'siteName', data.sortDirection);
-            return { rows: sorted, sortDirection: !data.sortDirection };
-        }
-        case 'added': {
-            const newRows = action.rows;
-            return { rows: [...(newRows || [])], sortDirection: data.sortDirection }
-        }
-        default: {
-            throw Error('Unknown action: ' + action.type);
-        }
-    }
 }
 
 export const Table = (props: TableProps): ReactElement => {
-    const testsContext = useContext(TestsContext);
-    const sitesContext = useContext(SitesContext);
-    const searchContext = useContext(SearchWordContext);
-    const [sortDirection, setSortDirection] = useState(true);
-    const [rowsElements, setRowsElements] = useState<ReactElement[]>([]);
+    const [tests, setTests] = useState([]);
+    const [sites, setSites] = useState([]);
     const initialState: Data = {rows: [], sortDirection: true};
     const [state, dispatch] = useReducer(
         rowsReducer,
@@ -72,65 +28,51 @@ export const Table = (props: TableProps): ReactElement => {
             getData('http://localhost:3100/tests'),
         ])
             .then(([sites, tests]) => {
-                sitesContext.setSites(sites);
-                testsContext.setTests(tests);
+                setSites(sites);
+                setTests(tests);
                 props.setCountOfFoundedTests(tests.length);
                 return [sites, tests];
             })
             .then(([sites, tests]) => createRows(tests, sites))
             .then((result) => {
-                setRowsElements(result);
-                dispatch({type: 'added', rows: result});
+                dispatch({type: ActionTypes.added, rows: result});
             });
     }, []);
 
     useEffect(() => {
-        if (testsContext.tests && sitesContext.sites) {
-            filterContextTestsByName(testsContext.tests, searchContext.searchWord)
+        if (tests && sites) {
+            filterContextTestsByName(tests, props.searchWord)
                 .then((tests) => {
                     props.setCountOfFoundedTests(tests.length);
-                    createRows(tests, sitesContext.sites!)
+                    createRows(tests, sites!)
                         .then((result) => {
-                            setRowsElements(result);
+                            dispatch({type: ActionTypes.added, rows: result})
                         });
                 })
             ;
         }
-    }, [searchContext.searchWord]);
+    }, [props.searchWord, sites, tests]);
 
     return (
         <>
             {state.rows.length === 0
-                ? searchContext.searchWord === '' ? (<h3>Loading...</h3>) : (<NoResults/>)
+                ? props.searchWord === '' ? (<h3>Loading...</h3>) : (<NoResults/>)
                 : (
                     <table className={styles.table}>
                         <thead>
                         <tr>
                             <th className={styles.tableHeader}
-                                onClick={() => {
-                                    dispatch({type: 'sortedByName'});
-                                    // setRowsElements(sortByAlphabet(rowsElements, 'name', sortDirection));
-                                    // setSortDirection(!sortDirection);
-                                }}>Name
+                                onClick={() => dispatch({type: ActionTypes.sortedByName})}>
+                                Name
                             </th>
-                            <th onClick={() => {
-                                dispatch({type: 'sortedByType'});
-                                // setRowsElements(sortByAlphabet(rowsElements, 'type', sortDirection));
-                                // setSortDirection(!sortDirection);
-                            }}>Type
+                            <th onClick={() => dispatch({type: ActionTypes.sortedByType})}>
+                                Type
                             </th>
-                            <th onClick={() => {
-                                dispatch({type: 'sortedByStatus'});
-                                // setRowsElements(sortByStatus(rowsElements, sortDirection));
-                                // setSortDirection(!sortDirection);
-                            }}>
+                            <th onClick={() => dispatch({type: ActionTypes.sortedByStatus})}>
                                 Status
                             </th>
-                            <th onClick={() => {
-                                dispatch({type: 'sortedBySiteName'});
-                                // setRowsElements(sortByAlphabet(rowsElements, 'siteName', sortDirection));
-                                // setSortDirection(!sortDirection);
-                            }}>Site
+                            <th onClick={() => dispatch({type: ActionTypes.sortedBySiteName})}>
+                                Site
                             </th>
                         </tr>
                         </thead>

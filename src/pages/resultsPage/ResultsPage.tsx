@@ -14,8 +14,7 @@ export const ResultsPage = (props: ResultsPageProps): ReactElement => {
     const [test, setTest] = useState<Test | null>(null);
 
     useEffect(() => {
-        const index = location.pathname.lastIndexOf('/');
-        const id = location.pathname.slice(index + 1, location.pathname.length);
+        const id = location.pathname.split('/').pop();
         getData(`http://localhost:3100/tests/${id}`).then((result) => setTest(result));
     }, []);
 

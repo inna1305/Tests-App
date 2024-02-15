@@ -34,9 +34,13 @@ function rowsReducer(data: Data, action: RowsAction): Data {
             const sorted = sortByAlphabet(newRows, 'name', data.sortDirection);
             return { rows: sorted, sortDirection: !data.sortDirection };
         }
+        case 'sortedType': {
+            const newRows = [...data.rows];
+            const sorted = sortByAlphabet(newRows, 'type', data.sortDirection);
+            return { rows: sorted, sortDirection: !data.sortDirection };
+        }
         case 'added': {
             const newRows = action.rows;
-            console.log(data.rows);
             return { rows: [...(newRows || [])], sortDirection: data.sortDirection }
         }
         default: {
@@ -105,8 +109,9 @@ export const Table = (props: TableProps): ReactElement => {
                                 }}>Name
                             </th>
                             <th onClick={() => {
-                                setRowsElements(sortByAlphabet(rowsElements, 'type', sortDirection));
-                                setSortDirection(!sortDirection);
+                                dispatch({type: 'sortedType'});
+                                // setRowsElements(sortByAlphabet(rowsElements, 'type', sortDirection));
+                                // setSortDirection(!sortDirection);
                             }}>Type
                             </th>
                             <th onClick={() => {

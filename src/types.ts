@@ -1,4 +1,3 @@
-import {Dispatch, SetStateAction} from 'react';
 import {TableRowProps} from './components/table/tableRow/TableRow';
 
 export enum Type {
@@ -41,17 +40,3 @@ export interface Test {
 
 export type TableRowPropsKeys = keyof TableRowProps;
 
-export interface ITestsContext {
-    tests: Test[];
-    setTests: Dispatch<SetStateAction<Test[]>>;
-}
-
-export interface ISitesContext {
-    sites: Site[];
-    setSites: Dispatch<SetStateAction<Site[]>>;
-}
-
-export interface ISearchContext {
-    searchWord: string,
-    setSearchWord: Dispatch<SetStateAction<string>>;
-}

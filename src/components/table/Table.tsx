@@ -10,7 +10,8 @@ import {ActionTypes, Data, rowsReducer} from './reducer';
 
 export interface TableProps {
     searchWord: string,
-    setCountOfFoundedTests: Dispatch<SetStateAction<number>>
+    setSearchWord: Dispatch<SetStateAction<string>>;
+    setCountOfFoundedTests: Dispatch<SetStateAction<number | null>>
 }
 
 export const Table = (props: TableProps): ReactElement => {
@@ -56,7 +57,7 @@ export const Table = (props: TableProps): ReactElement => {
     return (
         <>
             {state.rows.length === 0
-                ? props.searchWord === '' ? (<h3>Loading...</h3>) : (<NoResults/>)
+                ? props.searchWord === '' ? (<h3>Loading...</h3>) : (<NoResults setSearchWord={props.setSearchWord}/>)
                 : (
                     <table className={styles.table}>
                         <thead>

@@ -4,7 +4,7 @@ import styles from './SearchField.module.scss';
 export interface SearchFieldProps {
     searchWord: string,
     setSearchWord: Dispatch<SetStateAction<string>>;
-    countOfFounded: number,
+    countOfFounded: number | null,
 }
 
 export const SearchField = (props: SearchFieldProps): ReactElement => {

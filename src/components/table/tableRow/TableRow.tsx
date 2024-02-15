@@ -1,4 +1,3 @@
-import {memo, useEffect} from 'react';
 import React from 'react';
 import {CapitalizedStatus, CapitalizedType} from '../../../types';
 import styles from './../Table.module.scss';

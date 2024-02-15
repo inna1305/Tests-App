@@ -16,11 +16,6 @@ interface RowsAction {
     type: string,
     rows?: ReactElement[]
 }
-// //     name:
-// //     type:
-// //     status:
-// //     siteName:
-//
 
 interface Data {
     rows: ReactElement[],
@@ -42,6 +37,11 @@ function rowsReducer(data: Data, action: RowsAction): Data {
         case 'sortedByStatus': {
             const newRows = [...data.rows];
             const sorted = sortByStatus(newRows, data.sortDirection);
+            return { rows: sorted, sortDirection: !data.sortDirection };
+        }
+        case 'sortedBySiteName': {
+            const newRows = [...data.rows];
+            const sorted = sortByAlphabet(newRows, 'siteName', data.sortDirection);
             return { rows: sorted, sortDirection: !data.sortDirection };
         }
         case 'added': {
@@ -120,15 +120,16 @@ export const Table = (props: TableProps): ReactElement => {
                             }}>Type
                             </th>
                             <th onClick={() => {
-                                dispatch({type: 'sortedByStatus'})
+                                dispatch({type: 'sortedByStatus'});
                                 // setRowsElements(sortByStatus(rowsElements, sortDirection));
                                 // setSortDirection(!sortDirection);
                             }}>
                                 Status
                             </th>
                             <th onClick={() => {
-                                setRowsElements(sortByAlphabet(rowsElements, 'siteName', sortDirection));
-                                setSortDirection(!sortDirection);
+                                dispatch({type: 'sortedBySiteName'});
+                                // setRowsElements(sortByAlphabet(rowsElements, 'siteName', sortDirection));
+                                // setSortDirection(!sortDirection);
                             }}>Site
                             </th>
                         </tr>

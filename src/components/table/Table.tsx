@@ -34,10 +34,6 @@ export const Table = (props: TableProps): ReactElement => {
                 props.setCountOfFoundedTests(tests.length);
                 return [sites, tests];
             })
-            .then(([sites, tests]) => createRows(tests, sites))
-            .then((result) => {
-                dispatch({type: ActionTypes.added, rows: result});
-            });
     }, []);
 
     useEffect(() => {

@@ -29,14 +29,19 @@ interface Data {
 
 function rowsReducer(data: Data, action: RowsAction): Data {
     switch (action.type) {
-        case 'sortedName': {
+        case 'sortedByName': {
             const newRows = [...data.rows];
             const sorted = sortByAlphabet(newRows, 'name', data.sortDirection);
             return { rows: sorted, sortDirection: !data.sortDirection };
         }
-        case 'sortedType': {
+        case 'sortedByType': {
             const newRows = [...data.rows];
             const sorted = sortByAlphabet(newRows, 'type', data.sortDirection);
+            return { rows: sorted, sortDirection: !data.sortDirection };
+        }
+        case 'sortedByStatus': {
+            const newRows = [...data.rows];
+            const sorted = sortByStatus(newRows, data.sortDirection);
             return { rows: sorted, sortDirection: !data.sortDirection };
         }
         case 'added': {
@@ -103,20 +108,21 @@ export const Table = (props: TableProps): ReactElement => {
                         <tr>
                             <th className={styles.tableHeader}
                                 onClick={() => {
-                                    dispatch({type: 'sortedName'});
+                                    dispatch({type: 'sortedByName'});
                                     // setRowsElements(sortByAlphabet(rowsElements, 'name', sortDirection));
                                     // setSortDirection(!sortDirection);
                                 }}>Name
                             </th>
                             <th onClick={() => {
-                                dispatch({type: 'sortedType'});
+                                dispatch({type: 'sortedByType'});
                                 // setRowsElements(sortByAlphabet(rowsElements, 'type', sortDirection));
                                 // setSortDirection(!sortDirection);
                             }}>Type
                             </th>
                             <th onClick={() => {
-                                setRowsElements(sortByStatus(rowsElements, sortDirection));
-                                setSortDirection(!sortDirection);
+                                dispatch({type: 'sortedByStatus'})
+                                // setRowsElements(sortByStatus(rowsElements, sortDirection));
+                                // setSortDirection(!sortDirection);
                             }}>
                                 Status
                             </th>

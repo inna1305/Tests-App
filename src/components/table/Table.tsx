@@ -37,17 +37,18 @@ export const Table = (props: TableProps): ReactElement => {
     }, []);
 
     useEffect(() => {
-        if (tests && sites) {
-            filterContextTestsByName(tests, props.searchWord)
-                .then((tests) => {
-                    props.setCountOfFoundedTests(tests.length);
-                    createRows(tests, sites!)
-                        .then((result) => {
-                            dispatch({type: ActionTypes.added, rows: result})
-                        });
-                })
-            ;
+        if (!(tests && sites)) {
+            return;
         }
+        filterContextTestsByName(tests, props.searchWord)
+            .then((tests) => {
+                props.setCountOfFoundedTests(tests.length);
+                createRows(tests, sites!)
+                    .then((result) => {
+                        dispatch({type: ActionTypes.added, rows: result})
+                    });
+            })
+        ;
     }, [props.searchWord, sites, tests]);
 
     return (
